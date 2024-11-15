@@ -63,8 +63,7 @@ to quickly create a Cobra application.`,
 		table := pterm.TableData{}
 		table = append(table, []string{
 			"Name",
-			"Thermo",
-			"Dryer",
+			"Status",
 			"TempDesired",
 			"TempCurrent",
 		})
@@ -72,8 +71,7 @@ to quickly create a Cobra application.`,
 		for _, room := range rooms {
 			table = append(table, []string{
 				room.Name,
-				room.Thermo,
-				room.Dryer,
+				room.Status,
 				fmt.Sprintf("%.1f", room.TempDesired),
 				fmt.Sprintf("%.1f", room.TempCurrent),
 			})
