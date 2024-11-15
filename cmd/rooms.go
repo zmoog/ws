@@ -5,7 +5,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -43,7 +42,7 @@ and usage of using your command. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Println("list called")
 
 		identityManager := identity.NewManager(
@@ -57,7 +56,7 @@ to quickly create a Cobra application.`,
 
 		rooms, err := client.ListRooms(ulc)
 		if err != nil {
-			log.Fatalf("failed to list rooms: %v", err)
+			return fmt.Errorf("failed to list rooms: %w", err)
 		}
 
 		table := pterm.TableData{}
@@ -79,6 +78,8 @@ to quickly create a Cobra application.`,
 
 		// pterm.DefaultTable.WithData(table).Render()
 		pterm.DefaultTable.WithHasHeader().WithData(table).Render()
+
+		return nil
 	},
 }
 
