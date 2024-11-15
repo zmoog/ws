@@ -47,4 +47,6 @@ type Room struct {
 		Minimum float64 `json:"minimum"`
 		Maximum float64 `json:"maximum"`
 	} `json:"tempLimitExtra"`
+	HumidityDesired float64 `json:"humidityDesired"`
+	HumidityCurrent float64 `json:"humidityCurrent"`
 }

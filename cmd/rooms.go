@@ -63,8 +63,9 @@ to quickly create a Cobra application.`,
 		table = append(table, []string{
 			"Name",
 			"Status",
-			"TempDesired",
-			"TempCurrent",
+			"Temperature (desired)",
+			"Temperature (current)",
+			"Humidity (current)",
 		})
 
 		for _, room := range rooms {
@@ -73,6 +74,7 @@ to quickly create a Cobra application.`,
 				room.Status,
 				fmt.Sprintf("%.1f", room.TempDesired),
 				fmt.Sprintf("%.1f", room.TempCurrent),
+				fmt.Sprintf("%.1f", room.HumidityCurrent),
 			})
 		}
 
