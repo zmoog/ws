@@ -19,6 +19,7 @@ type Room struct {
 	Name             string  `json:"name"`
 	Code             string  `json:"code"`
 	Season           string  `json:"season"`
+	Status           string  `json:"status"`
 	Thermo           string  `json:"thermoStatus"`
 	Dryer            string  `json:"dryerStatus"`
 	TempDesired      float64 `json:"tempDesired"`

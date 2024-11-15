@@ -27,6 +27,17 @@ to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
+	// Run: func(cmd *cobra.Command, args []string) {
+	// 	fmt.Println("ws called")
+	// },
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		if !viper.IsSet("username") {
+			cmd.MarkFlagRequired("username")
+		}
+		if !viper.IsSet("password") {
+			cmd.MarkFlagRequired("password")
+		}
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -55,9 +66,6 @@ func init() {
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-	// Required flags
-	rootCmd.MarkFlagRequired("username")
-	rootCmd.MarkFlagRequired("password")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -81,12 +89,13 @@ func initConfig() {
 	viper.SetEnvPrefix("WS")
 	viper.AutomaticEnv() // read in environment variables that match
 
-	viper.BindPFlag("username", rootCmd.PersistentFlags().Lookup("username"))
-	viper.BindPFlag("password", rootCmd.PersistentFlags().Lookup("password"))
-	viper.BindPFlag("api_endpoint", rootCmd.PersistentFlags().Lookup("api-endpoint"))
-
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
+
+	viper.BindPFlag("username", rootCmd.PersistentFlags().Lookup("username"))
+	viper.BindPFlag("password", rootCmd.PersistentFlags().Lookup("password"))
+	viper.BindPFlag("api_endpoint", rootCmd.PersistentFlags().Lookup("api-endpoint"))
+
 }
