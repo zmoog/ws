@@ -9,6 +9,7 @@ import (
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/zmoog/ws/feedback"
 	"github.com/zmoog/ws/ws"
 	"github.com/zmoog/ws/ws/identity"
 )
@@ -43,8 +44,6 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("list called")
-
 		identityManager := identity.NewManager(
 			viper.GetString("username"),
 			viper.GetString("password"),
@@ -59,31 +58,50 @@ to quickly create a Cobra application.`,
 			return fmt.Errorf("failed to list rooms: %w", err)
 		}
 
-		table := pterm.TableData{}
-		table = append(table, []string{
-			"Name",
-			"Status",
-			"Temperature (desired)",
-			"Temperature (current)",
-			"Humidity (current)",
-		})
-
-		for _, room := range rooms {
-			table = append(table, []string{
-				room.Name,
-				room.Status,
-				fmt.Sprintf("%.1f", room.TempDesired),
-				fmt.Sprintf("%.1f", room.TempCurrent),
-				fmt.Sprintf("%.1f", room.HumidityCurrent),
-			})
-		}
-
-		if err := pterm.DefaultTable.WithHasHeader().WithData(table).Render(); err != nil {
-			return fmt.Errorf("failed to render table: %v", err)
-		}
+		_ = feedback.PrintResult(roomsListResult{rooms: rooms})
 
 		return nil
 	},
+}
+
+type roomsListResult struct {
+	rooms []ws.Room
+}
+
+func (r roomsListResult) Table() string {
+
+	table := pterm.TableData{}
+	table = append(table, []string{
+		"Name",
+		"Status",
+		"Temperature (desired)",
+		"Temperature (current)",
+		"Humidity (current)",
+	})
+
+	for _, room := range r.rooms {
+		table = append(table, []string{
+			room.Name,
+			room.Status,
+			fmt.Sprintf("%.1f", room.TempDesired),
+			fmt.Sprintf("%.1f", room.TempCurrent),
+			fmt.Sprintf("%.1f", room.HumidityCurrent),
+		})
+	}
+
+	if err := pterm.DefaultTable.WithHasHeader().WithData(table).Render(); err != nil {
+		return fmt.Sprintf("failed to render table: %v", err)
+	}
+
+	return ""
+}
+
+func (r roomsListResult) String() string {
+	return r.Table()
+}
+
+func (r roomsListResult) Data() any {
+	return r.rooms
 }
 
 func init() {

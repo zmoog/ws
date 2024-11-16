@@ -1,7 +1,6 @@
 package identity
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 )
@@ -36,11 +35,9 @@ func (m *manager) GetToken() (Token, error) {
 	}
 
 	if exists && token.ExpiresAt.After(time.Now()) {
-		fmt.Println("Using cached token")
 		return token, nil
 	}
 
-	fmt.Println("Fetching new token")
 	token, err = m.retriever.GetToken()
 	if err != nil {
 		return Token{}, err

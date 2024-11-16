@@ -10,9 +10,14 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/zmoog/ws/feedback"
 )
 
-var cfgFile string
+var (
+	cfgFile string
+	output  string
+	verbose bool
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -37,6 +42,20 @@ to quickly create a Cobra application.`,
 		if !viper.IsSet("password") {
 			_ = cmd.MarkFlagRequired("password")
 		}
+
+		output := viper.GetString("output")
+
+		switch output {
+		case "table":
+			feedback.SetFormat(feedback.Table)
+		case "text":
+			feedback.SetFormat(feedback.Text)
+		case "json":
+			feedback.SetFormat(feedback.JSON)
+		default:
+			feedback.Error(fmt.Sprintf("invalid output format: %s", output))
+			feedback.SetFormat(feedback.Table)
+		}
 	},
 }
 
@@ -58,9 +77,12 @@ func init() {
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.ws/config)")
 
-	rootCmd.PersistentFlags().String("username", "", "The username to use for authentication")
-	rootCmd.PersistentFlags().String("password", "", "The password to use for authentication")
-	rootCmd.PersistentFlags().String("api-endpoint", "https://wavin-api.jablotron.cloud", "The API endpoint to use")
+	rootCmd.PersistentFlags().StringP("username", "u", "", "The username to use for authentication")
+	rootCmd.PersistentFlags().StringP("password", "p", "", "The password to use for authentication")
+	rootCmd.PersistentFlags().StringP("api-endpoint", "e", "https://wavin-api.jablotron.cloud", "The API endpoint to use")
+
+	rootCmd.PersistentFlags().StringVarP(&output, "output", "o", "table", "The format to use for output")
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose output")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -98,4 +120,6 @@ func initConfig() {
 	_ = viper.BindPFlag("password", rootCmd.PersistentFlags().Lookup("password"))
 	_ = viper.BindPFlag("api_endpoint", rootCmd.PersistentFlags().Lookup("api-endpoint"))
 
+	_ = viper.BindPFlag("output", rootCmd.PersistentFlags().Lookup("output"))
+	_ = viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose"))
 }

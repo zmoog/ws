@@ -9,6 +9,7 @@ import (
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/zmoog/ws/feedback"
 	"github.com/zmoog/ws/ws"
 	"github.com/zmoog/ws/ws/identity"
 )
@@ -40,8 +41,6 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("list called")
-
 		identityManager := identity.NewManager(viper.GetString("username"), viper.GetString("password"))
 		client := ws.NewClient(identityManager, viper.GetString("api_endpoint"))
 
@@ -50,36 +49,51 @@ to quickly create a Cobra application.`,
 			return fmt.Errorf("failed to list locations: %v", err)
 		}
 
-		table := pterm.TableData{}
-		table = append(table, []string{
-			"Ulc",
-			"Registration",
-			"Serial Number",
-			"Mode",
-			"Vacation On",
-			"Outdoor Temperature",
-			"DST",
-		})
-
-		for _, location := range locations {
-			// fmt.Printf("location: %+v\n", location)
-			table = append(table, []string{
-				location.Ulc,
-				location.Registration,
-				fmt.Sprintf("%d", location.SerialNumber),
-				location.Attributes.Mode,
-				fmt.Sprintf("%t", location.Attributes.VacationOn),
-				fmt.Sprintf("%.1f", location.Attributes.Outdoor.Temperature),
-				fmt.Sprintf("%t", location.Attributes.Dst),
-			})
-		}
-
-		if err := pterm.DefaultTable.WithHasHeader().WithData(table).Render(); err != nil {
-			return fmt.Errorf("failed to render table: %v", err)
-		}
+		_ = feedback.PrintResult(locationResult{locations: locations})
 
 		return nil
 	},
+}
+
+type locationResult struct {
+	locations []ws.Location
+}
+
+func (r locationResult) Table() string {
+
+	table := pterm.TableData{}
+	table = append(table, []string{
+		"Ulc",
+		"Registration",
+		"Serial Number",
+		"Mode",
+		"Vacation On",
+		"Outdoor Temperature",
+		"DST",
+	})
+
+	for _, location := range r.locations {
+		table = append(table, []string{
+			location.Ulc,
+			location.Registration,
+			fmt.Sprintf("%d", location.SerialNumber),
+			location.Attributes.Mode,
+			fmt.Sprintf("%t", location.Attributes.VacationOn),
+			fmt.Sprintf("%.1f", location.Attributes.Outdoor.Temperature),
+			fmt.Sprintf("%t", location.Attributes.Dst),
+		})
+	}
+
+	rendered, _ := pterm.DefaultTable.WithHasHeader().WithData(table).Srender()
+	return rendered
+}
+
+func (r locationResult) String() string {
+	return r.Table()
+}
+
+func (r locationResult) Data() any {
+	return r.locations
 }
 
 func init() {

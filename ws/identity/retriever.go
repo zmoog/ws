@@ -37,7 +37,7 @@ func (r *tokenRetriever) GetToken() (Token, error) {
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	// print the request for debugging
-	fmt.Printf("request: %+v\n", req)
+	// fmt.Printf("request: %+v\n", req)
 
 	resp, err := r.client.Do(req)
 	if err != nil {
