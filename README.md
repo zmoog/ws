@@ -22,7 +22,7 @@ Ulc   | Registration     | Serial Number | Mode  | Vacation On | Outdoor Tempera
 List rooms in a location:
 
 ```sh
-$ ws rooms list --ulc 12345
+$ ws rooms list --location-id 12345
 
 Name                  | Status  | Temperature (desired) | Temperature (current) | Humidity (current)
 1 CUCINA              | idle    | 21.0                  | 21.2                  | 53.2
@@ -39,7 +39,17 @@ Name                  | Status  | Temperature (desired) | Temperature (current) 
 
 The tool uses a configuration file to store your credentials and tokens. The file is located in `~/.ws/config`.
 
-You can also set the username and password using the `-u` and `-p` flags, or by setting the `WS_USERNAME` and `WS_PASSWORD` environment variables.
+```sh
+$ cat ~/.ws/config
+username: myusername
+password: mypassword
+output: table
+```
+
+You can also set the username and password:
+
+- using the `--username` and `--password` flags, or
+- by setting the `WS_USERNAME` and `WS_PASSWORD` environment variables.
 
 ### Output formats
 
@@ -48,4 +58,4 @@ The tool supports several output formats:
 - `table`: (default) prints the output in a table format
 - `json`: prints the output in JSON format
 
-You can change the output format using the `-o` flag.
+You can change the output format using the `--output` flag.
