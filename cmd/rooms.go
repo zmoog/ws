@@ -21,28 +21,15 @@ var (
 // roomsCmd represents the rooms command
 var roomsCmd = &cobra.Command{
 	Use:   "rooms",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("rooms called")
-	},
+	Short: "Manage rooms",
+	Long:  `Manage rooms in your account.`,
 }
 
 // listCmd represents the list command
 var listRoomsCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List the rooms",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Long:  `List the rooms in a location.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		identityManager := identity.NewManager(
 			viper.GetString("username"),

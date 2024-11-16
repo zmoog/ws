@@ -17,29 +17,15 @@ import (
 // locationsCmd represents the locations command
 var locationsCmd = &cobra.Command{
 	Use:   "locations",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("locations called", viper.GetString("username"), viper.GetString("password"))
-		return nil
-	},
+	Short: "Manage locations",
+	Long:  `Manage locations in your account.`,
 }
 
 // listCmd represents the list command
 var listLocationsCmd = &cobra.Command{
 	Use:   "list",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "List locations",
+	Long:  `List the locations in your account.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		identityManager := identity.NewManager(viper.GetString("username"), viper.GetString("password"))
 		client := ws.NewClient(identityManager, viper.GetString("api_endpoint"))
