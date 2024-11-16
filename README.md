@@ -59,3 +59,23 @@ The tool supports several output formats:
 - `json`: prints the output in JSON format
 
 You can change the output format using the `--output` flag.
+
+```sh
+$ ws locations list --output json
+[
+  {
+    "ulc": "12345",
+    "registrationKey": "11111-22222-3333",
+    "serialNumber": "1122334455",
+    "attributes": {
+      "mode": "ready",
+      "vacationOn": false,
+      "vacationUntil": null,
+      "outdoor": {
+        "temperature": 4.2
+      },
+      "dst": true
+    }
+  }
+]
+```
