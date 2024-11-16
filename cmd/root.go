@@ -32,10 +32,10 @@ to quickly create a Cobra application.`,
 	// },
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		if !viper.IsSet("username") {
-			cmd.MarkFlagRequired("username")
+			_ = cmd.MarkFlagRequired("username")
 		}
 		if !viper.IsSet("password") {
-			cmd.MarkFlagRequired("password")
+			_ = cmd.MarkFlagRequired("password")
 		}
 	},
 }
@@ -94,8 +94,8 @@ func initConfig() {
 		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
 
-	viper.BindPFlag("username", rootCmd.PersistentFlags().Lookup("username"))
-	viper.BindPFlag("password", rootCmd.PersistentFlags().Lookup("password"))
-	viper.BindPFlag("api_endpoint", rootCmd.PersistentFlags().Lookup("api-endpoint"))
+	_ = viper.BindPFlag("username", rootCmd.PersistentFlags().Lookup("username"))
+	_ = viper.BindPFlag("password", rootCmd.PersistentFlags().Lookup("password"))
+	_ = viper.BindPFlag("api_endpoint", rootCmd.PersistentFlags().Lookup("api-endpoint"))
 
 }

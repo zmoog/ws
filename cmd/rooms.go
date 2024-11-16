@@ -78,8 +78,9 @@ to quickly create a Cobra application.`,
 			})
 		}
 
-		// pterm.DefaultTable.WithData(table).Render()
-		pterm.DefaultTable.WithHasHeader().WithData(table).Render()
+		if err := pterm.DefaultTable.WithHasHeader().WithData(table).Render(); err != nil {
+			return fmt.Errorf("failed to render table: %v", err)
+		}
 
 		return nil
 	},
@@ -100,5 +101,5 @@ func init() {
 	roomsCmd.AddCommand(listRoomsCmd)
 
 	listRoomsCmd.Flags().StringVarP(&ulc, "location-id", "l", "", "Location ID")
-	listRoomsCmd.MarkFlagRequired("location-id")
+	_ = listRoomsCmd.MarkFlagRequired("location-id")
 }
