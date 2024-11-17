@@ -37,7 +37,7 @@ func (m *manager) GetToken() (Token, error) {
 	}
 
 	if exists && token.ExpiresAt.After(time.Now()) {
-		fmt.Fprintf(os.Stderr, "Using cached token\n")
+		fmt.Fprintf(os.Stderr, "Using cached token (expires at %s)\n", token.ExpiresAt.Format(time.RFC3339))
 		return token, nil
 	}
 
@@ -46,7 +46,7 @@ func (m *manager) GetToken() (Token, error) {
 		return Token{}, err
 	}
 
-	fmt.Fprintf(os.Stderr, "Generated new token\n")
+	fmt.Fprintf(os.Stderr, "Generated new token (expires at %s)\n", token.ExpiresAt.Format(time.RFC3339))
 
 	err = m.store.StoreToken(token)
 	if err != nil {
