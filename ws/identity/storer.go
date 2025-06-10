@@ -7,13 +7,16 @@ import (
 	"path/filepath"
 )
 
+// Storer is an interface for storing a token.
 type Storer interface {
 	StoreToken(token Token) error
 	GetToken() (Token, bool, error)
 }
 
+// tokenStorer is a concrete implementation of Storer.
 type tokenStorer struct{}
 
+// StoreToken stores a token in the store.
 func (s *tokenStorer) StoreToken(token Token) error {
 	settingsPath, err := s.getSettingsPath()
 	if err != nil {
@@ -33,6 +36,7 @@ func (s *tokenStorer) StoreToken(token Token) error {
 	return os.WriteFile(settingsPath, data, 0600)
 }
 
+// GetToken retrieves a token from the store.
 func (s *tokenStorer) GetToken() (Token, bool, error) {
 
 	settingsPath, err := s.getSettingsPath()
@@ -58,6 +62,7 @@ func (s *tokenStorer) GetToken() (Token, bool, error) {
 	return token, true, nil
 }
 
+// getSettingsPath returns the path to the settings file.
 func (s *tokenStorer) getSettingsPath() (string, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
