@@ -10,16 +10,19 @@ import (
 	"time"
 )
 
+// Retriever is an interface for retrieving a token.
 type Retriever interface {
 	GetToken() (Token, error)
 }
 
+// tokenRetriever is a concrete implementation of Retriever.
 type tokenRetriever struct {
 	client   *http.Client
 	username string
 	password string
 }
 
+// GetToken retrieves a token from the token endpoint.
 func (r *tokenRetriever) GetToken() (Token, error) {
 	// post a application/x-www-form-urlencoded request to the token endpoint
 	// with the username and password

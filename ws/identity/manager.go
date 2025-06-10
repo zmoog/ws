@@ -1,9 +1,7 @@
 package identity
 
 import (
-	"fmt"
 	"net/http"
-	"os"
 	"time"
 )
 
@@ -30,6 +28,8 @@ func NewManager(username, password string) Manager {
 	}
 }
 
+// GetToken returns a token from the store if it exists and is not expired,
+// otherwise it retrieves a new token.
 func (m *manager) GetToken() (Token, error) {
 	token, exists, err := m.store.GetToken()
 	if err != nil {
@@ -37,7 +37,6 @@ func (m *manager) GetToken() (Token, error) {
 	}
 
 	if exists && token.ExpiresAt.After(time.Now()) {
-		fmt.Fprintf(os.Stderr, "Using cached token (expires at %s)\n", token.ExpiresAt.Format(time.RFC3339))
 		return token, nil
 	}
 
@@ -45,8 +44,6 @@ func (m *manager) GetToken() (Token, error) {
 	if err != nil {
 		return Token{}, err
 	}
-
-	fmt.Fprintf(os.Stderr, "Generated new token (expires at %s)\n", token.ExpiresAt.Format(time.RFC3339))
 
 	err = m.store.StoreToken(token)
 	if err != nil {
