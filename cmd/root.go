@@ -10,7 +10,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/zmoog/ws/feedback"
+	"github.com/zmoog/ws/v2/feedback"
 )
 
 var (
@@ -72,9 +72,9 @@ func init() {
 	rootCmd.PersistentFlags().StringP("username", "u", "", "The username to use for authentication")
 	rootCmd.PersistentFlags().StringP("password", "p", "", "The password to use for authentication")
 	rootCmd.PersistentFlags().StringP("api-endpoint", "e", "https://wavin-api.jablotron.cloud", "The API endpoint to use")
+	rootCmd.PersistentFlags().StringP("api-endpoint-version", "v", "v2.6", "The API endpoint version to use")
 
 	rootCmd.PersistentFlags().StringVarP(&output, "output", "o", "table", "The format to use for output")
-	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose output")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -110,8 +110,9 @@ func initConfig() {
 
 	_ = viper.BindPFlag("username", rootCmd.PersistentFlags().Lookup("username"))
 	_ = viper.BindPFlag("password", rootCmd.PersistentFlags().Lookup("password"))
+	_ = viper.BindPFlag("web_api_key", rootCmd.PersistentFlags().Lookup("web_api_key"))
 	_ = viper.BindPFlag("api_endpoint", rootCmd.PersistentFlags().Lookup("api-endpoint"))
-
+	_ = viper.BindPFlag("api_endpoint_version", rootCmd.PersistentFlags().Lookup("api-endpoint-version"))
 	_ = viper.BindPFlag("output", rootCmd.PersistentFlags().Lookup("output"))
 	_ = viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose"))
 }

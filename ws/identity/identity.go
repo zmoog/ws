@@ -1,15 +1,16 @@
 package identity
 
-import (
-	"time"
-)
+import "time"
 
 // Token represents an access token.
 type Token struct {
-	AccessToken  string    `json:"access_token"`
-	TokenType    string    `json:"token_type"`
-	ExpiresIn    int       `json:"expires_in"`
-	ExpiresAt    time.Time `json:"expires_at"`
-	RefreshToken string    `json:"refresh_token"`
-	Scope        string    `json:"scope"`
+	ID           string    `json:"idToken"`
+	DisplayName  string    `json:"displayName"`
+	Kind         string    `json:"kind"`
+	Email        string    `json:"email"`
+	LocalID      string    `json:"localId"`
+	Registered   bool      `json:"registered"`
+	RefreshToken string    `json:"refreshToken"`
+	ExpiresIn    string    `json:"expiresIn"`
+	ExpiresAt    time.Time `json:"expiresAt"`
 }

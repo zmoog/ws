@@ -9,9 +9,9 @@ import (
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/zmoog/ws/feedback"
-	"github.com/zmoog/ws/ws"
-	"github.com/zmoog/ws/ws/identity"
+	"github.com/zmoog/ws/v2/feedback"
+	"github.com/zmoog/ws/v2/ws"
+	"github.com/zmoog/ws/v2/ws/identity"
 )
 
 // locationsCmd represents the locations command
@@ -27,8 +27,16 @@ var listLocationsCmd = &cobra.Command{
 	Short: "List locations",
 	Long:  `List the locations in your account.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		identityManager := identity.NewManager(viper.GetString("username"), viper.GetString("password"))
-		client := ws.NewClient(identityManager, viper.GetString("api_endpoint"))
+		identityManager := identity.NewManager(
+			viper.GetString("username"),
+			viper.GetString("password"),
+			viper.GetString("web_api_key"),
+		)
+		client := ws.NewClient(
+			identityManager,
+			viper.GetString("api_endpoint"),
+			viper.GetString("api_endpoint_version"),
+		)
 
 		locations, err := client.ListLocations()
 		if err != nil {

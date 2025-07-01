@@ -2,22 +2,25 @@ package ws
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
-	"github.com/zmoog/ws/ws/identity"
+	"github.com/zmoog/ws/v2/ws/identity"
 )
 
 type Client struct {
-	client   *http.Client
-	endpoint string
-	identity identity.Manager
+	client          *http.Client
+	endpoint        string
+	endpointVersion string
+	identity        identity.Manager
 }
 
-func NewClient(identity identity.Manager, endpoint string) *Client {
+func NewClient(identity identity.Manager, endpoint string, endpointVersion string) *Client {
 	return &Client{
-		client:   http.DefaultClient,
-		identity: identity,
-		endpoint: endpoint,
+		client:          http.DefaultClient,
+		identity:        identity,
+		endpoint:        endpoint,
+		endpointVersion: endpointVersion,
 	}
 }
 
@@ -27,18 +30,22 @@ func (c *Client) ListLocations() ([]Location, error) {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("GET", c.endpoint+"/v2.6/locations", nil)
+	req, err := http.NewRequest("GET", c.endpoint+"/"+c.endpointVersion+"/locations", nil)
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Add("Authorization", "Bearer "+token.AccessToken)
+	req.Header.Add("Authorization", "Bearer "+token.ID)
 
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
 
 	var locations []Location
 	if err := json.NewDecoder(resp.Body).Decode(&locations); err != nil {
@@ -54,18 +61,22 @@ func (c *Client) ListRooms(location string) ([]Room, error) {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("GET", c.endpoint+"/v2.6/rooms", nil)
+	req, err := http.NewRequest("GET", c.endpoint+"/"+c.endpointVersion+"/rooms", nil)
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Add("Authorization", "Bearer "+token.AccessToken)
+	req.Header.Add("Authorization", "Bearer "+token.ID)
 
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
 
 	var rooms []Room
 	if err := json.NewDecoder(resp.Body).Decode(&rooms); err != nil {
