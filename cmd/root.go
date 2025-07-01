@@ -71,8 +71,7 @@ func init() {
 
 	rootCmd.PersistentFlags().StringP("username", "u", "", "The username to use for authentication")
 	rootCmd.PersistentFlags().StringP("password", "p", "", "The password to use for authentication")
-	rootCmd.PersistentFlags().StringP("api-endpoint", "e", "https://wavin-api.jablotron.cloud", "The API endpoint to use")
-	rootCmd.PersistentFlags().StringP("api-endpoint-version", "v", "v2.6", "The API endpoint version to use")
+	rootCmd.PersistentFlags().StringP("api-endpoint", "e", "https://blaze.wavinsentio.com/wavin.blaze.v1.BlazeDeviceService", "The API endpoint to use")
 
 	rootCmd.PersistentFlags().StringVarP(&output, "output", "o", "table", "The format to use for output")
 
@@ -112,7 +111,6 @@ func initConfig() {
 	_ = viper.BindPFlag("password", rootCmd.PersistentFlags().Lookup("password"))
 	_ = viper.BindPFlag("web_api_key", rootCmd.PersistentFlags().Lookup("web_api_key"))
 	_ = viper.BindPFlag("api_endpoint", rootCmd.PersistentFlags().Lookup("api-endpoint"))
-	_ = viper.BindPFlag("api_endpoint_version", rootCmd.PersistentFlags().Lookup("api-endpoint-version"))
 	_ = viper.BindPFlag("output", rootCmd.PersistentFlags().Lookup("output"))
 	_ = viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose"))
 }

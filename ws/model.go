@@ -1,19 +1,34 @@
 package ws
 
-type Location struct {
-	Ulc          string `json:"ulc"`
-	Registration string `json:"registrationKey"`
-	SerialNumber int    `json:"serialNumber"`
-	Attributes   struct {
-		Mode          string  `json:"mode"`
-		VacationOn    bool    `json:"vacationOn"`
-		VacationUntil *string `json:"vacationUntil"`
-		Outdoor       struct {
-			Temperature float64 `json:"temperature"`
-		} `json:"outdoor"`
-		Dst bool `json:"dst"`
-	} `json:"attributes"`
+import "time"
+
+type Devices struct {
+	Devices []Device `json:"devices"`
 }
+
+type Device struct {
+	Name              string    `json:"name"`
+	SerialNumber      string    `json:"serialNumber"`
+	FirmwareAvailable string    `json:"firmwareAvailable"`
+	FirmwareInstalled string    `json:"firmwareInstalled"`
+	Type              string    `json:"type"`
+	LastHeartbeat     time.Time `json:"lastHeartbeat"`
+}
+
+// type Location struct {
+// 	Ulc          string `json:"ulc"`
+// 	Registration string `json:"registrationKey"`
+// 	SerialNumber int    `json:"serialNumber"`
+// 	Attributes   struct {
+// 		Mode          string  `json:"mode"`
+// 		VacationOn    bool    `json:"vacationOn"`
+// 		VacationUntil *string `json:"vacationUntil"`
+// 		Outdoor       struct {
+// 			Temperature float64 `json:"temperature"`
+// 		} `json:"outdoor"`
+// 		Dst bool `json:"dst"`
+// 	} `json:"attributes"`
+// }
 
 type Room struct {
 	Name             string  `json:"name"`
