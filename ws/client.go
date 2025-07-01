@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/zmoog/ws/v2/ws/identity"
 )
@@ -15,26 +16,26 @@ type Client struct {
 	identity        identity.Manager
 }
 
-func NewClient(identity identity.Manager, endpoint string, endpointVersion string) *Client {
+func NewClient(identity identity.Manager, endpoint string) *Client {
 	return &Client{
-		client:          http.DefaultClient,
-		identity:        identity,
-		endpoint:        endpoint,
-		endpointVersion: endpointVersion,
+		client:   http.DefaultClient,
+		identity: identity,
+		endpoint: endpoint,
 	}
 }
 
-func (c *Client) ListLocations() ([]Location, error) {
+func (c *Client) ListDevices() ([]Device, error) {
 	token, err := c.identity.GetToken()
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("GET", c.endpoint+"/"+c.endpointVersion+"/locations", nil)
+	req, err := http.NewRequest("POST", c.endpoint+"/"+"ListDevices", strings.NewReader("{}"))
 	if err != nil {
 		return nil, err
 	}
 
+	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", "Bearer "+token.ID)
 
 	resp, err := c.client.Do(req)
@@ -47,12 +48,12 @@ func (c *Client) ListLocations() ([]Location, error) {
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	var locations []Location
-	if err := json.NewDecoder(resp.Body).Decode(&locations); err != nil {
+	var devices Devices
+	if err := json.NewDecoder(resp.Body).Decode(&devices); err != nil {
 		return nil, err
 	}
 
-	return locations, nil
+	return devices.Devices, nil
 }
 
 func (c *Client) ListRooms(location string) ([]Room, error) {
@@ -66,6 +67,7 @@ func (c *Client) ListRooms(location string) ([]Room, error) {
 		return nil, err
 	}
 
+	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", "Bearer "+token.ID)
 
 	resp, err := c.client.Do(req)

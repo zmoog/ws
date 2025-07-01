@@ -39,7 +39,6 @@ var listRoomsCmd = &cobra.Command{
 		client := ws.NewClient(
 			identityManager,
 			viper.GetString("api_endpoint"),
-			viper.GetString("api_endpoint_version"),
 		)
 
 		rooms, err := client.ListRooms(ulc)
