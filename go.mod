@@ -1,4 +1,4 @@
-module github.com/zmoog/ws
+module github.com/zmoog/ws/v2
 
 go 1.22.8
 

@@ -9,9 +9,9 @@ import (
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/zmoog/ws/feedback"
-	"github.com/zmoog/ws/ws"
-	"github.com/zmoog/ws/ws/identity"
+	"github.com/zmoog/ws/v2/feedback"
+	"github.com/zmoog/ws/v2/ws"
+	"github.com/zmoog/ws/v2/ws/identity"
 )
 
 var (
@@ -34,10 +34,12 @@ var listRoomsCmd = &cobra.Command{
 		identityManager := identity.NewManager(
 			viper.GetString("username"),
 			viper.GetString("password"),
+			viper.GetString("web_api_key"),
 		)
 		client := ws.NewClient(
 			identityManager,
 			viper.GetString("api_endpoint"),
+			viper.GetString("api_endpoint_version"),
 		)
 
 		rooms, err := client.ListRooms(ulc)
