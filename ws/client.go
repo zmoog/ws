@@ -56,15 +56,25 @@ func (c *Client) ListDevices() ([]Device, error) {
 	return devices.Devices, nil
 }
 
-func (c *Client) ListRooms(location string) ([]Room, error) {
+func (c *Client) GetDevice(deviceName string) (Device, error) {
 	token, err := c.identity.GetToken()
 	if err != nil {
-		return nil, err
+		return Device{}, err
 	}
 
-	req, err := http.NewRequest("GET", c.endpoint+"/"+c.endpointVersion+"/rooms", nil)
+	r := struct {
+		Name string `json:"name"`
+	}{
+		Name: deviceName,
+	}
+	jsonReq, err := json.Marshal(r)
 	if err != nil {
-		return nil, err
+		return Device{}, err
+	}
+
+	req, err := http.NewRequest("POST", c.endpoint+"/GetDevice", strings.NewReader(string(jsonReq)))
+	if err != nil {
+		return Device{}, err
 	}
 
 	req.Header.Add("Content-Type", "application/json")
@@ -72,18 +82,18 @@ func (c *Client) ListRooms(location string) ([]Room, error) {
 
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return nil, err
+		return Device{}, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+		return Device{}, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	var rooms []Room
-	if err := json.NewDecoder(resp.Body).Decode(&rooms); err != nil {
-		return nil, err
+	var device Device
+	if err := json.NewDecoder(resp.Body).Decode(&device); err != nil {
+		return Device{}, err
 	}
 
-	return rooms, nil
+	return device, nil
 }

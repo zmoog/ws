@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
@@ -41,47 +42,61 @@ var listRoomsCmd = &cobra.Command{
 			viper.GetString("api_endpoint"),
 		)
 
-		rooms, err := client.ListRooms(ulc)
+		device, err := client.GetDevice(ulc)
 		if err != nil {
 			return fmt.Errorf("failed to list rooms: %w", err)
 		}
 
-		_ = feedback.PrintResult(roomsListResult{rooms: rooms})
+		// fmt.Printf("%v\n", device)
+
+		_ = feedback.PrintResult(roomsListResult{device: device})
 
 		return nil
 	},
 }
 
 type roomsListResult struct {
-	rooms []ws.Room
+	device ws.Device
 }
 
 func (r roomsListResult) Table() string {
+	var sb strings.Builder
 
 	table := pterm.TableData{}
 	table = append(table, []string{
 		"Name",
-		"Status",
+		"Temperature state",
 		"Temperature (desired)",
 		"Temperature (current)",
 		"Humidity (current)",
+		"Dehumidification state",
 	})
 
-	for _, room := range r.rooms {
+	for _, room := range r.device.LastConfig.Sentio.Rooms {
 		table = append(table, []string{
-			room.Name,
-			room.Status,
-			fmt.Sprintf("%.1f", room.TempDesired),
-			fmt.Sprintf("%.1f", room.TempCurrent),
-			fmt.Sprintf("%.1f", room.HumidityCurrent),
+			room.Title,
+			room.TemperatureState,
+			fmt.Sprintf("%.1f", room.SetpointTemperature),
+			fmt.Sprintf("%.1f", room.AirTemperature),
+			fmt.Sprintf("%.1f", room.Humidity),
+			room.DehumidifierState,
 		})
 	}
 
-	if err := pterm.DefaultTable.WithHasHeader().WithData(table).Render(); err != nil {
-		return fmt.Sprintf("failed to render table: %v", err)
+	rendered, err := pterm.DefaultTable.WithHasHeader().WithData(table).Srender()
+	if err != nil {
+		return fmt.Sprintf("failed to render table: %s", err)
+	}
+	sb.WriteString(rendered)
+
+	// Add a newline after the table
+	sb.WriteString("\n")
+
+	for _, room := range r.device.LastConfig.Sentio.OutdoorTemperatureSensors {
+		sb.WriteString(fmt.Sprintf("Outdoor temperature: %.1f\n\n", room.OutdoorTemperature))
 	}
 
-	return ""
+	return sb.String()
 }
 
 func (r roomsListResult) String() string {
@@ -89,7 +104,7 @@ func (r roomsListResult) String() string {
 }
 
 func (r roomsListResult) Data() any {
-	return r.rooms
+	return r.device.LastConfig.Sentio.Rooms
 }
 
 func init() {
@@ -106,6 +121,6 @@ func init() {
 	// roomsCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	roomsCmd.AddCommand(listRoomsCmd)
 
-	listRoomsCmd.Flags().StringVarP(&ulc, "location-id", "l", "", "Location ID")
-	_ = listRoomsCmd.MarkFlagRequired("location-id")
+	listRoomsCmd.Flags().StringVarP(&ulc, "device-name", "d", "", "Device name")
+	_ = listRoomsCmd.MarkFlagRequired("device-name")
 }
