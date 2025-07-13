@@ -2,9 +2,11 @@ package ws
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"strings"
 
-	"github.com/zmoog/ws/ws/identity"
+	"github.com/zmoog/ws/v2/ws/identity"
 )
 
 type Client struct {
@@ -21,18 +23,19 @@ func NewClient(identity identity.Manager, endpoint string) *Client {
 	}
 }
 
-func (c *Client) ListLocations() ([]Location, error) {
+func (c *Client) ListDevices() ([]Device, error) {
 	token, err := c.identity.GetToken()
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("GET", c.endpoint+"/v2.6/locations", nil)
+	req, err := http.NewRequest("POST", c.endpoint+"/"+"ListDevices", strings.NewReader("{}"))
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Add("Authorization", "Bearer "+token.AccessToken)
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer "+token.ID)
 
 	resp, err := c.client.Do(req)
 	if err != nil {
@@ -40,37 +43,56 @@ func (c *Client) ListLocations() ([]Location, error) {
 	}
 	defer resp.Body.Close()
 
-	var locations []Location
-	if err := json.NewDecoder(resp.Body).Decode(&locations); err != nil {
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	var devices Devices
+	if err := json.NewDecoder(resp.Body).Decode(&devices); err != nil {
 		return nil, err
 	}
 
-	return locations, nil
+	return devices.Devices, nil
 }
 
-func (c *Client) ListRooms(location string) ([]Room, error) {
+func (c *Client) GetDevice(deviceName string) (Device, error) {
 	token, err := c.identity.GetToken()
 	if err != nil {
-		return nil, err
+		return Device{}, err
 	}
 
-	req, err := http.NewRequest("GET", c.endpoint+"/v2.6/rooms", nil)
+	r := struct {
+		Name string `json:"name"`
+	}{
+		Name: deviceName,
+	}
+	jsonReq, err := json.Marshal(r)
 	if err != nil {
-		return nil, err
+		return Device{}, err
 	}
 
-	req.Header.Add("Authorization", "Bearer "+token.AccessToken)
+	req, err := http.NewRequest("POST", c.endpoint+"/GetDevice", strings.NewReader(string(jsonReq)))
+	if err != nil {
+		return Device{}, err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer "+token.ID)
 
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return nil, err
+		return Device{}, err
 	}
 	defer resp.Body.Close()
 
-	var rooms []Room
-	if err := json.NewDecoder(resp.Body).Decode(&rooms); err != nil {
-		return nil, err
+	if resp.StatusCode != http.StatusOK {
+		return Device{}, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	return rooms, nil
+	var device Device
+	if err := json.NewDecoder(resp.Body).Decode(&device); err != nil {
+		return Device{}, err
+	}
+
+	return device, nil
 }

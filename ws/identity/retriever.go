@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -17,29 +17,44 @@ type Retriever interface {
 
 // tokenRetriever is a concrete implementation of Retriever.
 type tokenRetriever struct {
-	client   *http.Client
-	username string
-	password string
+	client    *http.Client
+	webApiKey string
+	username  string
+	password  string
 }
 
 // GetToken retrieves a token from the token endpoint.
 func (r *tokenRetriever) GetToken() (Token, error) {
-	// post a application/x-www-form-urlencoded request to the token endpoint
-	// with the username and password
-	form := url.Values{}
-	form.Set("username", r.username)
-	form.Set("password", r.password)
-	form.Set("grant_type", "password")
 
-	req, err := http.NewRequest("POST", "https://wavin-api.jablotron.cloud/v2.6/oauth/token", strings.NewReader(form.Encode()))
+	req := struct {
+		Email             string `json:"email"`
+		Password          string `json:"password"`
+		ClientType        string `json:"clientType"`
+		ReturnSecureToken bool   `json:"returnSecureToken"`
+	}{
+		Email:             r.username,
+		Password:          r.password,
+		ClientType:        "CLIENT_TYPE_WEB",
+		ReturnSecureToken: true,
+	}
+
+	jsonReq, err := json.Marshal(req)
 	if err != nil {
 		return Token{}, err
 	}
 
-	req.Header.Add("Authorization", "Basic YXBwOnNlY3JldA==")
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	request, err := http.NewRequest(
+		"POST",
+		"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key="+r.webApiKey,
+		strings.NewReader(string(jsonReq)),
+	)
+	if err != nil {
+		return Token{}, err
+	}
 
-	resp, err := r.client.Do(req)
+	request.Header.Add("Content-Type", "application/json")
+
+	resp, err := r.client.Do(request)
 	if err != nil {
 		return Token{}, err
 	}
@@ -60,7 +75,14 @@ func (r *tokenRetriever) GetToken() (Token, error) {
 		return Token{}, err
 	}
 
-	tokenResponse.ExpiresAt = time.Now().Add(time.Duration(tokenResponse.ExpiresIn) * time.Second)
+	expiresIn, err := strconv.Atoi(tokenResponse.ExpiresIn)
+	if err != nil {
+		return Token{}, fmt.Errorf("failed to parse expiresIn: %v", err)
+	}
+
+	// We calculate the expiration time once, so it's handy
+	// to have it available later.
+	tokenResponse.ExpiresAt = time.Now().Add(time.Duration(expiresIn) * time.Second)
 
 	return tokenResponse, nil
 }

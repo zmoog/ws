@@ -14,11 +14,12 @@ type manager struct {
 	store     Storer
 }
 
-func NewManager(username, password string) Manager {
+func NewManager(username, password, webApiKey string) Manager {
 	retriever := tokenRetriever{
-		client:   http.DefaultClient,
-		username: username,
-		password: password,
+		client:    http.DefaultClient,
+		username:  username,
+		password:  password,
+		webApiKey: webApiKey,
 	}
 	store := tokenStorer{}
 
@@ -37,14 +38,17 @@ func (m *manager) GetToken() (Token, error) {
 	}
 
 	if exists && token.ExpiresAt.After(time.Now()) {
+		// Token is still valid
 		return token, nil
 	}
 
+	// Token is expired or does not exist
 	token, err = m.retriever.GetToken()
 	if err != nil {
 		return Token{}, err
 	}
 
+	// Store the new token
 	err = m.store.StoreToken(token)
 	if err != nil {
 		return Token{}, err
