@@ -1,7 +1,6 @@
 package identity
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 )
@@ -40,19 +39,16 @@ func (m *manager) GetToken() (Token, error) {
 
 	if exists && token.ExpiresAt.After(time.Now()) {
 		// Token is still valid
-		fmt.Println("Token is still valid")
 		return token, nil
 	}
 
 	// Token is expired or does not exist
-	fmt.Println("Token is expired or does not exist")
 	token, err = m.retriever.GetToken()
 	if err != nil {
 		return Token{}, err
 	}
 
 	// Store the new token
-	fmt.Println("Storing new token")
 	err = m.store.StoreToken(token)
 	if err != nil {
 		return Token{}, err
