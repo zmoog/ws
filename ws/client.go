@@ -10,10 +10,9 @@ import (
 )
 
 type Client struct {
-	client          *http.Client
-	endpoint        string
-	endpointVersion string
-	identity        identity.Manager
+	client   *http.Client
+	endpoint string
+	identity identity.Manager
 }
 
 func NewClient(identity identity.Manager, endpoint string) *Client {
