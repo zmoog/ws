@@ -36,16 +36,16 @@ type Device struct {
 func setupTestCLI(t *testing.T) *TestCLI {
 	tempDir := t.TempDir()
 	binaryPath := filepath.Join(tempDir, "ws-test")
-	
+
 	// Build the CLI binary
 	cmd := exec.Command("go", "build", "-o", binaryPath, ".")
 	cmd.Env = append(os.Environ(), "CGO_ENABLED=0")
-	
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("Failed to build CLI binary: %v\nOutput: %s", err, string(output))
 	}
-	
+
 	return &TestCLI{
 		binaryPath: binaryPath,
 		tempDir:    tempDir,
@@ -55,17 +55,17 @@ func setupTestCLI(t *testing.T) *TestCLI {
 // runCommand executes the CLI with given arguments and returns stdout, stderr, and exit code
 func (cli *TestCLI) runCommand(args ...string) (stdout, stderr string, exitCode int) {
 	cmd := exec.Command(cli.binaryPath, args...)
-	
+
 	// Set environment to prevent reading user's config file
 	cmd.Env = []string{
 		"HOME=" + cli.tempDir, // Use temp directory as home
 		"PATH=" + os.Getenv("PATH"),
 	}
-	
+
 	var stdoutBuf, stderrBuf bytes.Buffer
 	cmd.Stdout = &stdoutBuf
 	cmd.Stderr = &stderrBuf
-	
+
 	err := cmd.Run()
 	if err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
@@ -74,7 +74,7 @@ func (cli *TestCLI) runCommand(args ...string) (stdout, stderr string, exitCode 
 			exitCode = 1
 		}
 	}
-	
+
 	return stdoutBuf.String(), stderrBuf.String(), exitCode
 }
 
@@ -85,7 +85,7 @@ func createMockFirebaseAuth(t *testing.T) *httptest.Server {
 			http.NotFound(w, r)
 			return
 		}
-		
+
 		// Mock successful authentication response
 		response := map[string]any{
 			"idToken":      "mock-firebase-token-123456",
@@ -97,9 +97,9 @@ func createMockFirebaseAuth(t *testing.T) *httptest.Server {
 			"displayName":  "Test User",
 			"kind":         "identitytoolkit#VerifyPasswordResponse",
 		}
-		
+
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(response)
+		_ = json.NewEncoder(w).Encode(response)
 	}))
 }
 
@@ -113,7 +113,7 @@ func createMockWavinAPI(t *testing.T) *httptest.Server {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
-		
+
 		switch {
 		case strings.Contains(r.URL.Path, "ListDevices"):
 			// Mock devices list response
@@ -143,10 +143,10 @@ func createMockWavinAPI(t *testing.T) *httptest.Server {
 					},
 				},
 			}
-			
+
 			w.Header().Set("Content-Type", "application/json")
 			json.NewEncoder(w).Encode(devices)
-			
+
 		default:
 			http.NotFound(w, r)
 		}
@@ -160,12 +160,12 @@ func TestDevicesListCommand_TableOutput(t *testing.T) {
 	mockAPI := createMockWavinAPI(t)
 	defer mockAuth.Close()
 	defer mockAPI.Close()
-	
+
 	// We need to override the Firebase auth URL used by the CLI
 	// This requires setting environment variable or modifying the code to accept it
 	// For now, let's skip this complex integration and use a simpler approach
 	t.Skip("Integration test requires Firebase auth URL override - skipping for now")
-	
+
 	// Run command
 	stdout, stderr, exitCode := cli.runCommand(
 		"devices", "list",
@@ -175,12 +175,12 @@ func TestDevicesListCommand_TableOutput(t *testing.T) {
 		"--api-endpoint", mockAPI.URL,
 		"--output", "table",
 	)
-	
+
 	// Assertions
 	if exitCode != 0 {
 		t.Errorf("Expected exit code 0, got %d\nStdout: %s\nStderr: %s", exitCode, stdout, stderr)
 	}
-	
+
 	// Check that output contains expected table headers
 	expectedHeaders := []string{"Name", "Serial Number", "Firmware Available", "Type"}
 	for _, header := range expectedHeaders {
@@ -188,7 +188,7 @@ func TestDevicesListCommand_TableOutput(t *testing.T) {
 			t.Errorf("Expected output to contain header '%s', but it didn't.\nOutput: %s", header, stdout)
 		}
 	}
-	
+
 	// Check that output contains test device data
 	if !strings.Contains(stdout, "devices/test-device-1") {
 		t.Errorf("Expected output to contain test device, but it didn't.\nOutput: %s", stdout)
@@ -205,10 +205,10 @@ func TestDevicesListCommand_JSONOutput(t *testing.T) {
 	mockAPI := createMockWavinAPI(t)
 	defer mockAuth.Close()
 	defer mockAPI.Close()
-	
+
 	// Skip for same reason as table test
 	t.Skip("Integration test requires Firebase auth URL override - skipping for now")
-	
+
 	// Run command
 	stdout, stderr, exitCode := cli.runCommand(
 		"devices", "list",
@@ -218,23 +218,23 @@ func TestDevicesListCommand_JSONOutput(t *testing.T) {
 		"--api-endpoint", mockAPI.URL,
 		"--output", "json",
 	)
-	
+
 	// Assertions
 	if exitCode != 0 {
 		t.Errorf("Expected exit code 0, got %d\nStdout: %s\nStderr: %s", exitCode, stdout, stderr)
 	}
-	
+
 	// Verify JSON output is valid
 	var devices []Device
 	if err := json.Unmarshal([]byte(stdout), &devices); err != nil {
 		t.Errorf("Expected valid JSON output, but got error: %v\nOutput: %s", err, stdout)
 	}
-	
+
 	// Verify we got the expected number of devices
 	if len(devices) != 2 {
 		t.Errorf("Expected 2 devices, got %d", len(devices))
 	}
-	
+
 	// Verify device data
 	if devices[0].Name != "devices/test-device-1" {
 		t.Errorf("Expected first device name 'devices/test-device-1', got '%s'", devices[0].Name)
@@ -244,10 +244,10 @@ func TestDevicesListCommand_JSONOutput(t *testing.T) {
 func TestDevicesListCommand_InvalidCredentials(t *testing.T) {
 	// Setup
 	cli := setupTestCLI(t)
-	
+
 	// Skip for same reason - would need to mock Firebase auth endpoint
 	t.Skip("Integration test requires Firebase auth URL override - skipping for now")
-	
+
 	// Run command with invalid credentials
 	stdout, stderr, exitCode := cli.runCommand(
 		"devices", "list",
@@ -256,12 +256,12 @@ func TestDevicesListCommand_InvalidCredentials(t *testing.T) {
 		"--web-api-key", "test-web-api-key",
 		"--api-endpoint", "http://mock-api.example.com",
 	)
-	
+
 	// Assertions
 	if exitCode == 0 {
 		t.Errorf("Expected non-zero exit code for invalid credentials, got 0\nStdout: %s\nStderr: %s", stdout, stderr)
 	}
-	
+
 	// Should contain error message
 	output := stdout + stderr
 	if !strings.Contains(strings.ToLower(output), "error") && !strings.Contains(strings.ToLower(output), "fail") {
@@ -272,15 +272,15 @@ func TestDevicesListCommand_InvalidCredentials(t *testing.T) {
 func TestDevicesListCommand_MissingCredentials(t *testing.T) {
 	// Setup
 	cli := setupTestCLI(t)
-	
+
 	// Run command without credentials
 	stdout, stderr, exitCode := cli.runCommand("devices", "list")
-	
+
 	// Assertions
 	if exitCode == 0 {
 		t.Errorf("Expected non-zero exit code for missing credentials, got %d\nStdout: %s\nStderr: %s", exitCode, stdout, stderr)
 	}
-	
+
 	// Should indicate missing required flags
 	output := stdout + stderr
 	if !strings.Contains(strings.ToLower(output), "required") && !strings.Contains(strings.ToLower(output), "username") {
@@ -291,15 +291,15 @@ func TestDevicesListCommand_MissingCredentials(t *testing.T) {
 func TestCLIHelp(t *testing.T) {
 	// Setup
 	cli := setupTestCLI(t)
-	
+
 	// Run help command
 	stdout, stderr, exitCode := cli.runCommand("--help")
-	
+
 	// Assertions
 	if exitCode != 0 {
 		t.Errorf("Expected exit code 0 for help, got %d\nStderr: %s", exitCode, stderr)
 	}
-	
+
 	// Check for expected help content
 	expectedContent := []string{"Usage:", "devices", "Manage devices"}
 	for _, content := range expectedContent {
