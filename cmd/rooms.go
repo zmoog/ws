@@ -44,7 +44,7 @@ var listRoomsCmd = &cobra.Command{
 
 		device, err := client.GetDevice(ulc)
 		if err != nil {
-			return fmt.Errorf("failed to list rooms: %w", err)
+			return fmt.Errorf("failed to get device: %w", err)
 		}
 
 		// fmt.Printf("%v\n", device)
