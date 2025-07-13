@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/zmoog/ws/v2/feedback"
 	"github.com/zmoog/ws/v2/ws/identity"
 )
 
@@ -26,7 +27,9 @@ var loginCmd = &cobra.Command{
 			return fmt.Errorf("failed to get token: %w", err)
 		}
 
-		fmt.Println("Login successful", token)
+		feedback.Println(
+			fmt.Sprintf("Login successful, expires at %s", token.ExpiresAt.Format("2006-01-02 15:04:05 -0700 MST")),
+		)
 
 		return nil
 	},
