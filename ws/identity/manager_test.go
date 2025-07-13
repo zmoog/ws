@@ -17,9 +17,9 @@ func (m *mockRetriever) GetToken() (Token, error) {
 }
 
 type mockStorer struct {
-	token     Token
-	exists    bool
-	getError  error
+	token      Token
+	exists     bool
+	getError   error
 	storeError error
 }
 
@@ -39,13 +39,13 @@ func TestManager_GetToken_ValidCachedToken(t *testing.T) {
 		ID:        "valid-token",
 		ExpiresAt: time.Now().Add(1 * time.Hour),
 	}
-	
+
 	mockStore := &mockStorer{
 		token:  validToken,
 		exists: true,
 	}
 	mockRetrieve := &mockRetriever{}
-	
+
 	manager := &manager{
 		retriever: mockRetrieve,
 		store:     mockStore,
@@ -73,7 +73,7 @@ func TestManager_GetToken_ExpiredCachedToken(t *testing.T) {
 		ID:        "new-token",
 		ExpiresAt: time.Now().Add(1 * time.Hour),
 	}
-	
+
 	mockStore := &mockStorer{
 		token:  expiredToken,
 		exists: true,
@@ -81,7 +81,7 @@ func TestManager_GetToken_ExpiredCachedToken(t *testing.T) {
 	mockRetrieve := &mockRetriever{
 		token: newToken,
 	}
-	
+
 	manager := &manager{
 		retriever: mockRetrieve,
 		store:     mockStore,
@@ -109,14 +109,14 @@ func TestManager_GetToken_NoTokenExists(t *testing.T) {
 		ID:        "new-token",
 		ExpiresAt: time.Now().Add(1 * time.Hour),
 	}
-	
+
 	mockStore := &mockStorer{
 		exists: false,
 	}
 	mockRetrieve := &mockRetriever{
 		token: newToken,
 	}
-	
+
 	manager := &manager{
 		retriever: mockRetrieve,
 		store:     mockStore,
@@ -144,7 +144,7 @@ func TestManager_GetToken_StoreGetError(t *testing.T) {
 		getError: errors.New("store error"),
 	}
 	mockRetrieve := &mockRetriever{}
-	
+
 	manager := &manager{
 		retriever: mockRetrieve,
 		store:     mockStore,
@@ -170,7 +170,7 @@ func TestManager_GetToken_RetrieverError(t *testing.T) {
 	mockRetrieve := &mockRetriever{
 		err: errors.New("retriever error"),
 	}
-	
+
 	manager := &manager{
 		retriever: mockRetrieve,
 		store:     mockStore,
@@ -194,7 +194,7 @@ func TestManager_GetToken_StoreTokenError(t *testing.T) {
 		ID:        "new-token",
 		ExpiresAt: time.Now().Add(1 * time.Hour),
 	}
-	
+
 	mockStore := &mockStorer{
 		exists:     false,
 		storeError: errors.New("store token error"),
@@ -202,7 +202,7 @@ func TestManager_GetToken_StoreTokenError(t *testing.T) {
 	mockRetrieve := &mockRetriever{
 		token: newToken,
 	}
-	
+
 	manager := &manager{
 		retriever: mockRetrieve,
 		store:     mockStore,
@@ -228,7 +228,7 @@ func TestNewManager(t *testing.T) {
 	if manager == nil {
 		t.Error("Expected manager to be created, got nil")
 	}
-	
+
 	// Verify manager implements Manager interface
 	var _ Manager = manager
 }
