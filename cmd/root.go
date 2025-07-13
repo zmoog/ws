@@ -16,7 +16,6 @@ import (
 var (
 	cfgFile string
 	output  string
-	verbose bool
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -113,5 +112,4 @@ func initConfig() {
 	_ = viper.BindPFlag("web_api_key", rootCmd.PersistentFlags().Lookup("web-api-key"))
 	_ = viper.BindPFlag("api_endpoint", rootCmd.PersistentFlags().Lookup("api-endpoint"))
 	_ = viper.BindPFlag("output", rootCmd.PersistentFlags().Lookup("output"))
-	_ = viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose"))
 }
