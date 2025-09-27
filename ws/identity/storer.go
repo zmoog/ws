@@ -70,3 +70,30 @@ func (s *tokenStorer) getSettingsPath() (string, error) {
 	}
 	return filepath.Join(homeDir, ".ws", "identity"), nil
 }
+
+// inMemoryStorer is a concrete implementation of Storer
+// that stores the token in memory.
+type inMemoryStorer struct {
+	token *Token
+}
+
+// NewInMemoryStorer creates a new in-memory storer.
+func NewInMemoryStorer() Storer {
+	return &inMemoryStorer{
+		token: nil,
+	}
+}
+
+// StoreToken stores a token in the memory.
+func (s *inMemoryStorer) StoreToken(token Token) error {
+	s.token = &token
+	return nil
+}
+
+// GetToken retrieves a token from the memory.
+func (s *inMemoryStorer) GetToken() (Token, bool, error) {
+	if s.token == nil {
+		return Token{}, false, nil
+	}
+	return *s.token, true, nil
+}
