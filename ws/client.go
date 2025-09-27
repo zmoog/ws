@@ -41,7 +41,7 @@ func (c *Client) ListDevices() ([]Device, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() // nolint
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
@@ -83,7 +83,7 @@ func (c *Client) GetDevice(deviceName string) (Device, error) {
 	if err != nil {
 		return Device{}, err
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() // nolint
 
 	if resp.StatusCode != http.StatusOK {
 		return Device{}, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
