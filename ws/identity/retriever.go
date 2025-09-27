@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -54,7 +53,7 @@ func (r *tokenRetriever) GetToken() (Token, error) {
 	request, err := http.NewRequest(
 		"POST",
 		signInWithPasswordEndpoint+r.webApiKey,
-		strings.NewReader(string(jsonReq)),
+		bytes.NewReader(jsonReq),
 	)
 	if err != nil {
 		return Token{}, err
