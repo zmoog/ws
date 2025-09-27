@@ -21,10 +21,11 @@ func (m *mockRetriever) RefreshToken(refreshToken string) (Token, error) {
 }
 
 type mockStorer struct {
-	token      Token
-	exists     bool
-	getError   error
-	storeError error
+	token        Token
+	exists       bool
+	getError     error
+	storeError   error
+	refreshError error
 }
 
 func (m *mockStorer) GetToken() (Token, bool, error) {
