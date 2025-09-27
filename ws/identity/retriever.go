@@ -65,7 +65,7 @@ func (r *tokenRetriever) GetToken() (Token, error) {
 	if err != nil {
 		return Token{}, err
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() // nolint
 
 	if resp.StatusCode != http.StatusOK {
 		// return the response body as a string
@@ -124,7 +124,7 @@ func (r *tokenRetriever) RefreshToken(refreshToken string) (Token, error) {
 	if err != nil {
 		return Token{}, err
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() // nolint
 
 	if resp.StatusCode != http.StatusOK {
 		body, err := io.ReadAll(resp.Body)

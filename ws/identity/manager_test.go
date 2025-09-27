@@ -21,11 +21,10 @@ func (m *mockRetriever) RefreshToken(refreshToken string) (Token, error) {
 }
 
 type mockStorer struct {
-	token        Token
-	exists       bool
-	getError     error
-	storeError   error
-	refreshError error
+	token      Token
+	exists     bool
+	getError   error
+	storeError error
 }
 
 func (m *mockStorer) GetToken() (Token, bool, error) {
@@ -235,5 +234,5 @@ func TestNewManager(t *testing.T) {
 	}
 
 	// Verify manager implements Manager interface
-	var _ Manager = manager
+	var _ Manager = manager //nolint
 }
