@@ -1,6 +1,7 @@
 package identity
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,6 +9,12 @@ import (
 	"strconv"
 	"strings"
 	"time"
+)
+
+//nolint:lll
+const (
+	signInWithPasswordEndpoint = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key="
+	tokenEndpoint              = "https://securetoken.googleapis.com/v1/token?key="
 )
 
 // Retriever is an interface for retrieving a token.
@@ -46,7 +53,7 @@ func (r *tokenRetriever) GetToken() (Token, error) {
 
 	request, err := http.NewRequest(
 		"POST",
-		"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key="+r.webApiKey,
+		signInWithPasswordEndpoint+r.webApiKey,
 		strings.NewReader(string(jsonReq)),
 	)
 	if err != nil {
@@ -105,8 +112,8 @@ func (r *tokenRetriever) RefreshToken(refreshToken string) (Token, error) {
 
 	request, err := http.NewRequest(
 		"POST",
-		"https://securetoken.googleapis.com/v1/token?key="+r.webApiKey,
-		strings.NewReader(string(jsonReq)),
+		tokenEndpoint+r.webApiKey,
+		bytes.NewReader(jsonReq),
 	)
 	if err != nil {
 		return Token{}, err
