@@ -14,3 +14,8 @@ type Token struct {
 	ExpiresIn    string    `json:"expiresIn"`
 	ExpiresAt    time.Time `json:"expiresAt"`
 }
+
+// IsExpired returns true if the token is expired.
+func (t *Token) IsExpired() bool {
+	return t.ExpiresAt.Before(time.Now()) || t.ExpiresAt.IsZero()
+}

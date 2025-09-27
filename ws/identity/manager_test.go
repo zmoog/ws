@@ -16,11 +16,16 @@ func (m *mockRetriever) GetToken() (Token, error) {
 	return m.token, m.err
 }
 
+func (m *mockRetriever) RefreshToken(refreshToken string) (Token, error) {
+	return m.token, m.err
+}
+
 type mockStorer struct {
-	token      Token
-	exists     bool
-	getError   error
-	storeError error
+	token        Token
+	exists       bool
+	getError     error
+	storeError   error
+	refreshError error
 }
 
 func (m *mockStorer) GetToken() (Token, bool, error) {
@@ -44,11 +49,11 @@ func TestManager_GetToken_ValidCachedToken(t *testing.T) {
 		token:  validToken,
 		exists: true,
 	}
-	mockRetrieve := &mockRetriever{}
+	mockRetriever := &mockRetriever{}
 
 	manager := &manager{
-		retriever: mockRetrieve,
-		store:     mockStore,
+		retriever: mockRetriever,
+		storer:    mockStore,
 	}
 
 	// Act
@@ -78,13 +83,13 @@ func TestManager_GetToken_ExpiredCachedToken(t *testing.T) {
 		token:  expiredToken,
 		exists: true,
 	}
-	mockRetrieve := &mockRetriever{
+	mockRetriever := &mockRetriever{
 		token: newToken,
 	}
 
 	manager := &manager{
-		retriever: mockRetrieve,
-		store:     mockStore,
+		retriever: mockRetriever,
+		storer:    mockStore,
 	}
 
 	// Act
@@ -113,13 +118,13 @@ func TestManager_GetToken_NoTokenExists(t *testing.T) {
 	mockStore := &mockStorer{
 		exists: false,
 	}
-	mockRetrieve := &mockRetriever{
+	mockRetriever := &mockRetriever{
 		token: newToken,
 	}
 
 	manager := &manager{
-		retriever: mockRetrieve,
-		store:     mockStore,
+		retriever: mockRetriever,
+		storer:    mockStore,
 	}
 
 	// Act
@@ -143,11 +148,11 @@ func TestManager_GetToken_StoreGetError(t *testing.T) {
 	mockStore := &mockStorer{
 		getError: errors.New("store error"),
 	}
-	mockRetrieve := &mockRetriever{}
+	mockRetriever := &mockRetriever{}
 
 	manager := &manager{
-		retriever: mockRetrieve,
-		store:     mockStore,
+		retriever: mockRetriever,
+		storer:    mockStore,
 	}
 
 	// Act
@@ -167,13 +172,13 @@ func TestManager_GetToken_RetrieverError(t *testing.T) {
 	mockStore := &mockStorer{
 		exists: false,
 	}
-	mockRetrieve := &mockRetriever{
+	mockRetriever := &mockRetriever{
 		err: errors.New("retriever error"),
 	}
 
 	manager := &manager{
-		retriever: mockRetrieve,
-		store:     mockStore,
+		retriever: mockRetriever,
+		storer:    mockStore,
 	}
 
 	// Act
@@ -199,13 +204,13 @@ func TestManager_GetToken_StoreTokenError(t *testing.T) {
 		exists:     false,
 		storeError: errors.New("store token error"),
 	}
-	mockRetrieve := &mockRetriever{
+	mockRetriever := &mockRetriever{
 		token: newToken,
 	}
 
 	manager := &manager{
-		retriever: mockRetrieve,
-		store:     mockStore,
+		retriever: mockRetriever,
+		storer:    mockStore,
 	}
 
 	// Act
