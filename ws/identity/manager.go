@@ -30,18 +30,18 @@ func NewManager(username, password, webApiKey string) Manager {
 }
 
 // NewInMemoryManager creates a manager that stores the token in memory.
-func NewInMemoryManager() Manager {
+func NewInMemoryManager(username, password, webApiKey string) Manager {
 	retriever := tokenRetriever{
 		client:    http.DefaultClient,
 		username:  username,
 		password:  password,
 		webApiKey: webApiKey,
 	}
-	storer := inMemoryStorer{}
+	storer := NewInMemoryStorer()
 
 	return &manager{
 		retriever: &retriever,
-		store:     &storer,
+		store:     storer,
 	}
 }
 
