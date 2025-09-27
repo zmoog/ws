@@ -16,16 +16,15 @@ jobs:
     timeout-minutes: 5
     strategy:
       fail-fast: true
+      matrix:
+        go: ['stable', 'oldstable']
 
     steps:
-      - name: Install Go
-        uses: actions/setup-go@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
         with:
-          go-version: 'stable'
-          check-latest: true
+          go-version: ${{ matrix.go }}
 
-      - name: Checkout
-        uses: actions/checkout@v3
 
       - name: Install govulncheck
         run: go install golang.org/x/vuln/cmd/govulncheck@latest

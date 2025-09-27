@@ -26,14 +26,11 @@ jobs:
         go: ['stable', 'oldstable']
 
     steps:
-      - name: Check out code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v5
 
-      - name: Install Go
-        uses: actions/setup-go@v4
+      - uses: actions/setup-go@v6
         with:
           go-version: ${{ matrix.go }}
-          check-latest: true
 
       - name: Go Format
         run: gofmt -s -w . && git diff --exit-code
@@ -70,7 +67,7 @@ jobs:
 
       - name: Upload Coverage
         if: ${{ !inputs.skipTests }}
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         continue-on-error: true
         with:
           token: ${{secrets.CODECOV_TOKEN}}
