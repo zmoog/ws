@@ -16,19 +16,21 @@ jobs:
     timeout-minutes: 5
     strategy:
       fail-fast: true
+      matrix:
+        go: ['stable', 'oldstable']
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
-          go-version: 'stable'
+          go-version: ${{ matrix.go }}
           check-latest: true
 
       - name: Lint
-        uses: golangci/golangci-lint-action@v3.4.0
+        uses: golangci/golangci-lint-action@v4
         with:
           version: latest
           args: --timeout 5m
