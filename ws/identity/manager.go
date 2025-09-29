@@ -11,7 +11,6 @@ type Manager interface {
 type manager struct {
 	retriever Retriever
 	storer    Storer
-	config    Config
 }
 
 func NewManager(config Config) Manager {
