@@ -28,9 +28,11 @@ var listDevicesCmd = &cobra.Command{
 	Long:  `List the devices in your account.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		identityManager := identity.NewManager(
-			viper.GetString("username"),
-			viper.GetString("password"),
-			viper.GetString("web_api_key"),
+			identity.Config{
+				Username:  viper.GetString("username"),
+				Password:  viper.GetString("password"),
+				WebApiKey: viper.GetString("web_api_key"),
+			},
 		)
 		client := ws.NewClient(
 			identityManager,

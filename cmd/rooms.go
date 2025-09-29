@@ -33,9 +33,11 @@ var listRoomsCmd = &cobra.Command{
 	Long:  `List the rooms in a location.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		identityManager := identity.NewManager(
-			viper.GetString("username"),
-			viper.GetString("password"),
-			viper.GetString("web_api_key"),
+			identity.Config{
+				Username:  viper.GetString("username"),
+				Password:  viper.GetString("password"),
+				WebApiKey: viper.GetString("web_api_key"),
+			},
 		)
 		client := ws.NewClient(
 			identityManager,
@@ -46,8 +48,6 @@ var listRoomsCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("failed to get device: %w", err)
 		}
-
-		// fmt.Printf("%v\n", device)
 
 		_ = feedback.PrintResult(roomsListResult{device: device})
 
