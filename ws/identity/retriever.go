@@ -14,6 +14,7 @@ import (
 const (
 	signInWithPasswordEndpoint = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key="
 	tokenEndpoint              = "https://securetoken.googleapis.com/v1/token?key="
+	tokenLifespanPercentage    = 90 // percentage of the token's lifespan to use the calculated expires at value.
 )
 
 // Retriever is an interface for retrieving a token.
@@ -188,5 +189,5 @@ func calculateExpiresAt(expiresIn int) time.Time {
 		//
 		// We refresh the token a little earlier, but it will be
 		// always valid when we use it.
-		Add(time.Duration(expiresIn*90/100) * time.Second)
+		Add(time.Duration(expiresIn*tokenLifespanPercentage/100) * time.Second)
 }
