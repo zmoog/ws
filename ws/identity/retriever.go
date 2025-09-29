@@ -14,6 +14,7 @@ import (
 const (
 	signInWithPasswordEndpoint = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key="
 	tokenEndpoint              = "https://securetoken.googleapis.com/v1/token?key="
+	tokenLifespanPercentage    = 90 // percentage of the token's lifespan to use the calculated expires at value.
 )
 
 // Retriever is an interface for retrieving a token.
@@ -24,15 +25,14 @@ type Retriever interface {
 
 // tokenRetriever is a concrete implementation of Retriever.
 type tokenRetriever struct {
-	client    *http.Client
-	webApiKey string
-	username  string
-	password  string
+	httpClient *http.Client
+	webApiKey  string
+	username   string
+	password   string
 }
 
 // GetToken retrieves a token from the token endpoint.
 func (r *tokenRetriever) GetToken() (Token, error) {
-
 	req := struct {
 		Email             string `json:"email"`
 		Password          string `json:"password"`
@@ -61,7 +61,7 @@ func (r *tokenRetriever) GetToken() (Token, error) {
 
 	request.Header.Add("Content-Type", "application/json")
 
-	resp, err := r.client.Do(request)
+	resp, err := r.httpClient.Do(request)
 	if err != nil {
 		return Token{}, err
 	}
@@ -77,7 +77,12 @@ func (r *tokenRetriever) GetToken() (Token, error) {
 		return Token{}, fmt.Errorf("unexpected status code: %d\n%s", resp.StatusCode, string(body))
 	}
 
-	var tokenResponse Token
+	var tokenResponse struct {
+		IDToken      string `json:"idToken"`
+		ExpiresIn    string `json:"expiresIn"`
+		LocalID      string `json:"localId"`
+		RefreshToken string `json:"refreshToken"`
+	}
 	if err := json.NewDecoder(resp.Body).Decode(&tokenResponse); err != nil {
 		return Token{}, err
 	}
@@ -87,11 +92,15 @@ func (r *tokenRetriever) GetToken() (Token, error) {
 		return Token{}, fmt.Errorf("failed to parse expiresIn: %v", err)
 	}
 
-	// We calculate the expiration time once, so it's handy
-	// to have it available later.
-	tokenResponse.ExpiresAt = time.Now().Add(time.Duration(expiresIn) * time.Second)
+	token := Token{
+		ID:           tokenResponse.IDToken,
+		RefreshToken: tokenResponse.RefreshToken,
+		ExpiresIn:    expiresIn,
+		ExpiresAt:    calculateExpiresAt(expiresIn),
+		LocalID:      tokenResponse.LocalID,
+	}
 
-	return tokenResponse, nil
+	return token, nil
 }
 
 // RefreshToken refreshes an expired token using a refresh token.
@@ -120,7 +129,7 @@ func (r *tokenRetriever) RefreshToken(refreshToken string) (Token, error) {
 
 	request.Header.Add("Content-Type", "application/json")
 
-	resp, err := r.client.Do(request)
+	resp, err := r.httpClient.Do(request)
 	if err != nil {
 		return Token{}, err
 	}
@@ -156,10 +165,29 @@ func (r *tokenRetriever) RefreshToken(refreshToken string) (Token, error) {
 	token := Token{
 		ID:           refreshResponse.IDToken,
 		RefreshToken: refreshResponse.RefreshToken,
-		ExpiresIn:    refreshResponse.ExpiresIn,
-		ExpiresAt:    time.Now().Add(time.Duration(expiresIn) * time.Second),
+		ExpiresIn:    expiresIn,
+		ExpiresAt:    calculateExpiresAt(expiresIn),
 		LocalID:      refreshResponse.UserID,
 	}
 
 	return token, nil
+}
+
+// calculateExpiresAt calculates the expiration time for a token.
+func calculateExpiresAt(expiresIn int) time.Time {
+	return time.Now().
+		// We calculate the expiration time once, so it's handy to have it
+		// available later.
+		//
+		// We force a token usage duration of 90% of the token's
+		// lifespan to avoid expiration while the request is in
+		// flight.
+		//
+		// It happens if we request a token with a lifespan of 1 hour and
+		// use the token every 60s: the token is valid when we check it,
+		// but it will be expired when we use it.
+		//
+		// We refresh the token a little earlier, but it will be
+		// always valid when we use it.
+		Add(time.Duration(expiresIn*tokenLifespanPercentage/100) * time.Second)
 }

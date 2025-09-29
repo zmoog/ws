@@ -1,6 +1,8 @@
 package identity
 
-import "time"
+import (
+	"time"
+)
 
 // Token represents an access token.
 type Token struct {
@@ -11,11 +13,11 @@ type Token struct {
 	LocalID      string    `json:"localId"`
 	Registered   bool      `json:"registered"`
 	RefreshToken string    `json:"refreshToken"`
-	ExpiresIn    string    `json:"expiresIn"`
+	ExpiresIn    int       `json:"expiresIn"`
 	ExpiresAt    time.Time `json:"expiresAt"`
 }
 
 // IsExpired returns true if the token is expired.
 func (t *Token) IsExpired() bool {
-	return t.ExpiresAt.Before(time.Now()) || t.ExpiresAt.IsZero()
+	return t.ExpiresAt.Before(time.Now())
 }

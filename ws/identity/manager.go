@@ -13,12 +13,12 @@ type manager struct {
 	storer    Storer
 }
 
-func NewManager(username, password, webApiKey string) Manager {
+func NewManager(config Config) Manager {
 	retriever := tokenRetriever{
-		client:    http.DefaultClient,
-		username:  username,
-		password:  password,
-		webApiKey: webApiKey,
+		httpClient: http.DefaultClient,
+		username:   config.Username,
+		password:   config.Password,
+		webApiKey:  config.WebApiKey,
 	}
 	storer := tokenStorer{}
 
@@ -29,12 +29,12 @@ func NewManager(username, password, webApiKey string) Manager {
 }
 
 // NewInMemoryManager creates a manager that stores the token in memory.
-func NewInMemoryManager(username, password, webApiKey string) Manager {
+func NewInMemoryManager(config Config) Manager {
 	retriever := tokenRetriever{
-		client:    http.DefaultClient,
-		username:  username,
-		password:  password,
-		webApiKey: webApiKey,
+		httpClient: http.DefaultClient,
+		username:   config.Username,
+		password:   config.Password,
+		webApiKey:  config.WebApiKey,
 	}
 	storer := NewInMemoryStorer()
 

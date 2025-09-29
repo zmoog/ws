@@ -226,7 +226,11 @@ func TestManager_GetToken_StoreTokenError(t *testing.T) {
 
 func TestNewManager(t *testing.T) {
 	// Act
-	manager := NewManager("user", "pass", "key")
+	manager := NewManager(Config{
+		Username:  "user",
+		Password:  "pass",
+		WebApiKey: "key",
+	})
 
 	// Assert
 	if manager == nil {

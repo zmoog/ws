@@ -14,12 +14,13 @@ var loginCmd = &cobra.Command{
 	Short: "Login to the Wavin API",
 	Long:  `Login to the Wavin API.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("Login to the Wavin API")
-
+		feedback.Println("Login to the Wavin API")
 		im := identity.NewManager(
-			viper.GetString("username"),
-			viper.GetString("password"),
-			viper.GetString("web_api_key"),
+			identity.Config{
+				Username:  viper.GetString("username"),
+				Password:  viper.GetString("password"),
+				WebApiKey: viper.GetString("web_api_key"),
+			},
 		)
 
 		token, err := im.GetToken()
