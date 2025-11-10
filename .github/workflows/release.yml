@@ -1,34 +1,35 @@
-name: goreleaser
+name: release
 
 on:
+  workflow_dispatch:
   push:
+    # run only against tags
     tags:
-      - "v*"
+      - "v[0-9].[0-9]+.[0-9]+*"
 
 permissions:
   contents: write
 
 jobs:
   goreleaser:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
-          go-version: stable
+          go-version: 1.25.3
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
-          version: "~> v2"
+          version: latest
           args: release --clean
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_PAT: ${{ secrets.GH_PAT }}
-
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}

@@ -2,52 +2,56 @@ version: 2
 
 before:
   hooks:
+    # You may remove this if you don't use go modules.
     - go mod tidy
+    # you may remove this if you don't need go generate
+    - go generate ./...
+
+archives:
+  - ids:
+      - ws
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    formats: ["tar.gz"]
+    files:
+      - README.md
+      - LICENSE*
 
 builds:
-  - env:
+  - binary: ws
+    id: ws
+    ldflags:
+      - -s -w -X github.com/zmoog/ws/v2/commands.version={{.Version}} -X github.com/zmoog/ws/v2/commands.commit={{.Commit}} -X github.com/zmoog/ws/v2/commands.date={{.Date}} -X github.com/zmoog/ws/v2/commands.builtBy=goreleaser
+    env:
       - CGO_ENABLED=0
     goos:
       - linux
-      - windows
       - darwin
     goarch:
       - amd64
       - arm64
     main: ./main.go
-    binary: ws
-    ldflags:
-      - -s -w -X main.version={{.Version}}
 
-archives:
-  - format: tar.gz
-    name_template: >-
-      {{ .ProjectName }}_
-      {{- title .Os }}_
-      {{- if eq .Arch "amd64" }}x86_64
-      {{- else if eq .Arch "386" }}i386
-      {{- else }}{{ .Arch }}{{ end }}
-      {{- if .Arm }}v{{ .Arm }}{{ end }}
-    format_overrides:
-      - goos: windows
-        format: zip
+release:
+  name_template: "{{.ProjectName}} v{{.Version}}"
+  draft: false
+  prerelease: auto
 
-brews:
-  - repository:
+homebrew_casks:
+  - name: ws
+    repository:
       owner: zmoog
       name: homebrew-ws
-      token: "{{ .Env.GH_PAT }}"
-    directory: Casks
-    homepage: "https://github.com/zmoog/ws"
-    description: "CLI tool and Go library to interact with Wavin Sentio floor heating systems"
-    license: "MIT"
-    install: |
-      bin.install "ws"
-    test: |
-      system "#{bin}/ws", "--version"
-
+      branch: main
+    binaries:
+      - ws
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/ws"]
+          end
 checksum:
-  name_template: 'checksums.txt'
+  name_template: "checksums.txt"
 
 snapshot:
   version_template: "{{ incpatch .Version }}-next"
@@ -56,6 +60,5 @@ changelog:
   sort: asc
   filters:
     exclude:
-      - '^docs:'
-      - '^test:'
-
+      - "^docs:"
+      - "^test:"
