@@ -4,6 +4,14 @@ CLI tool and Go library to interact with Wavin Sentio floor heating systems.
 
 ## Installation
 
+### Homebrew (macOS and Linux)
+
+```sh
+brew install zmoog/ws/ws
+```
+
+### Go Install
+
 ```sh
 go install github.com/zmoog/ws/v2@latest
 ```
